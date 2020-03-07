@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cheer.hole.dao.LikedDao">
+    <resultMap id="likeShareMap" type="com.cheer.hole.entity.Like">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="liked_user_id" property="likedUserId" jdbcType="VARCHAR"/>
+        <result column="liked_post_id" property="likedPostId" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <insert id="insertLike" parameterType="Like">
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE">
+            select replace(uuid(),'-','') AS id
+        </selectKey>
+        insert into like_post(id,liked_user_id,liked_post_id,type,status)
+        values(#{id},#{like.likedUserId},#{like.likedPostId},#{like.type},#{like.status});
+    </insert>
+
+    <update id="updateLikeStatus">
+        update like_post
+        set status = #{status}
+        where liked_post_id = #{likedPostId} and liked_user_id = #{likedUserId};
+    </update>
+
+    <select id="getMyLikeFromShare" resultMap="likeShareMap" resultType="Like">
+        select a.id,a.liked_post_id,a.liked_user_id,a.type,a.status
+        from like_post a
+        where a.liked_user_id = #{likedUserId} and a.type='share' and a.status = 1;
+    </select>
+
+    <select id="getMyLikeFromHide" resultMap="likeShareMap" resultType="Like">
+        select a.id,a.liked_post_id,a.liked_user_id,a.type,a.status
+        from like_post a
+        where a.liked_user_id = #{likedUserId} and a.type='hide' and a.status = 1;
+    </select>
+
+    <select id="getByLikedUserIdAndLikedPostId" resultType="INTEGER">
+        select count(*)
+        from like_post
+        where liked_user_id = #{likedUserId} and liked_post_id = #{likedPostId};
+    </select>
+
+    <select id="ifLikedByLikedUserIdAndLikedPostId" resultType="INTEGER">
+        select count(*)
+        from like_post
+        where liked_user_id = #{likedUserId} and liked_post_id = #{likedPostId} and status =1;
+    </select>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cheer.hole.dao.UserShareDao">
+
+    <resultMap type="com.cheer.hole.entity.UserShare" id="shareMap">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="looked" property="looked" jdbcType="INTEGER"/>
+        <result column="text" property="text" jdbcType="VARCHAR"/>
+        <result column="open_id" property="openId" jdbcType="VARCHAR"/>
+        <result column="like_num" property="likeNum" jdbcType="INTEGER"/>
+        <result column="comm_num" property="commNum" jdbcType="INTEGER"/>
+        <collection property="imgList" ofType="com.cheer.hole.entity.ShareImg">
+            <id column="img.id" property="id" jdbcType="VARCHAR"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
+            <result column="img.shareId" property="shareId" jdbcType="VARCHAR"/><!-- property对应JavaBean中的属性名 -->
+            <result column="img.imgUrl" property="imgUrl" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insertUserShare">
+        insert into user_share(id,avatar,text,user_name,open_id)
+        values('${uuid}','${avatar}','${text}','${userName}','${openId}');
+    </insert>
+
+
+    
+    <select resultMap="shareMap" id="getAllShare" resultType="com.cheer.hole.entity.UserShare" parameterType="INTEGER">
+        select u.id,u.avatar,u.looked,u.create_time,u.text,u.user_name,u.open_id,u.like_num,u.comm_num,
+        i.id as 'img.id',i.share_id as 'img.shareId',i.img_url as 'img.imgUrl'
+        from user_share u
+        left join share_img i on i.share_id = u.id
+        where u.delete = 0 order by u.create_time desc
+        limit #{pageNum},20;
+    </select>
+
+    <select resultMap="shareMap" id="getShareById" resultType="com.cheer.hole.entity.UserShare">
+        select u.id,u.avatar,u.looked,u.create_time,u.text,u.user_name,u.open_id,u.like_num,u.comm_num,
+        i.id as 'img.id',i.share_id as 'img.shareId',i.img_url as 'img.imgUrl'
+        from user_share u
+        left join share_img i on i.share_id = u.id where u.id = #{id} and u.delete = 0;
+    </select>
+
+    <select resultMap="shareMap" id="getMyShare" resultType="com.cheer.hole.entity.UserShare">
+        select u.id,u.avatar,u.looked,u.create_time,u.text,u.user_name,u.open_id,u.like_num,u.comm_num,
+        i.id as 'img.id',i.share_id as 'img.shareId',i.img_url as 'img.imgUrl'
+        from user_share u
+        left join share_img i on i.share_id = u.id
+        where u.open_id = #{openId} and u.delete = 0
+        order by u.create_time desc;
+    </select>
+
+    <update id="deleteShare" parameterType="STRING">
+        update user_share u
+        set u.delete = 1
+        where u.id = #{id};
+    </update>
+
+    <update id="updateLikeNum">
+        update user_share
+        set like_num = like_num + #{likeNum}
+        where id = #{likedPostId};
+    </update>
+
+    <update id="decrCommNum">
+        update user_share
+        set comm_num = comm_num-1
+        where id = #{commPostId};
+    </update>
+
+    <update id="incrCommNum">
+        update user_share
+        set comm_num = comm_num+1
+        where id = #{commPostId};
+    </update>
+
+    <update id="updateLookedNum">
+        update user_share
+        set looked =looked + #{lookedNum}
+        where id = #{lookedPostId};
+    </update>
+</mapper>

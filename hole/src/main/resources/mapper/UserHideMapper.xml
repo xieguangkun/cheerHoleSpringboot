@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cheer.hole.dao.UserHideDao">
+    <resultMap type="com.cheer.hole.entity.UserHide" id="hideMap">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="looked" property="looked" jdbcType="INTEGER"/>
+        <result column="text" property="text" jdbcType="VARCHAR"/>
+        <result column="open_id" property="openId" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="like_num" property="likeNum" jdbcType="INTEGER"/>
+        <result column="comm_num" property="commNum" jdbcType="INTEGER"/>
+        <collection property="imgList" ofType="com.cheer.hole.entity.ShareImg">
+            <result column="img.id" property="id" jdbcType="VARCHAR"/><!-- 这里的column对应的是下面查询的别名，而不是表字段名 -->
+            <result column="img.shareId" property="shareId" jdbcType="VARCHAR"/><!-- property对应JavaBean中的属性名 -->
+            <result column="img.imgUrl" property="imgUrl" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insertUserHide">
+        insert into user_hide(id,avatar,text,user_name,open_id,type)
+        values('${uuid}','${avatar}','${text}','${userName}','${openId}','${type}');
+    </insert>
+
+    <select resultMap="hideMap" id="getHideByEmotion" resultType="com.cheer.hole.entity.UserHide">
+        select u.id,u.avatar,u.looked,u.create_time,u.text,u.user_name,u.open_id,u.type,u.like_num,u.comm_num,
+        i.id as 'img.id',i.share_id as 'img.shareId',i.img_url as 'img.imgUrl'
+        from user_hide u
+        left join share_img i on i.share_id = u.id
+        where u.delete = 0 and u.type = #{emotion} order by u.create_time desc
+        limit #{pageNum},20;
+    </select>
+
+    <select resultMap="hideMap" id="getHideById" resultType="com.cheer.hole.entity.UserHide">
+        select u.id,u.avatar,u.looked,u.create_time,u.text,u.user_name,u.open_id,u.type,u.like_num,u.comm_num,
+        i.id as 'img.id',i.share_id as 'img.shareId',i.img_url as 'img.imgUrl'
+        from user_hide u
+        left join share_img i on i.share_id = u.id where u.id = #{id} and u.delete = 0;
+    </select>
+
+    <select resultMap="hideMap" id="getMyHide" resultType="com.cheer.hole.entity.UserHide">
+        select u.id,u.avatar,u.looked,u.create_time,u.text,u.user_name,u.open_id,u.type,u.like_num,u.comm_num,
+        i.id as 'img.id',i.share_id as 'img.shareId',i.img_url as 'img.imgUrl'
+        from user_hide u
+        left join share_img i on i.share_id = u.id where u.open_id = #{openId} and u.delete = 0
+        order by u.create_time desc;
+    </select>
+
+    <update id="deleteHide" parameterType="STRING">
+        update user_hide u
+        set u.delete = 1
+        where u.id = #{id};
+    </update>
+
+    <update id="updateLikeNum">
+        update user_hide
+        set like_num = like_num + #{likeNum}
+        where id = #{likedPostId};
+    </update>
+
+    <update id="decrCommNum">
+        update user_hide
+        set comm_num = comm_num-1
+        where id = #{commPostId};
+    </update>
+
+    <update id="incrCommNum">
+        update user_hide
+        set comm_num = comm_num+1
+        where id = #{commPostId};
+    </update>
+
+    <update id="updateLookedNum">
+        update user_hide
+        set looked = looked + #{lookedNum}
+        where id = #{lookedPostId};
+    </update>
+</mapper>

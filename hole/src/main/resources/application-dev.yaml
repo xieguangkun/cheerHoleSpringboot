@@ -1,0 +1,37 @@
+server:
+  port: 8080
+  ssl:
+    key-store: classpath:www.cheerhole.cn.jks
+    key-password: yWIkyT8G
+    key-store-type: JKS
+
+img:
+  location: /usr/resources
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 500MB
+      enabled: true
+  datasource:
+    username: root
+    password: Cheerhole2019
+    url: jdbc:mysql://121.199.34.192:3306/cheer_hole?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: 121.199.34.192
+    port: 6379
+    password: Cheerhole2019
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.cheer.hole.entity
+
+
+#showSql
+logging:
+  level:
+    com:
+      example:
+        mapper : debug

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cheer.hole.dao.CommentDao">
+
+    <resultMap type="com.cheer.hole.entity.Comment" id="commentMap">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="share_id" property="shareId" jdbcType="VARCHAR"/>
+        <result column="comuser_id" property="comuserId" jdbcType="VARCHAR"/>
+        <result column="comment" property="comment" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="comm_name" property="commName" jdbcType="VARCHAR"/>
+        <result column="comm_avatar" property="commAvatar" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="insertComment" parameterType="com.cheer.hole.entity.Comment">
+        insert into comment(id,share_id,comuser_id,comm_name,comm_avatar,comment)
+        values(#{comment.id},#{comment.shareId},#{comment.comuserId},#{comment.commName},#{comment.commAvatar},#{comment.comment});
+    </insert>
+
+    <select resultMap="commentMap" id="getCommentById"  resultType="com.cheer.hole.entity.Comment">
+        select c.id,c.share_id,c.comuser_id,c.comment,c.create_time,c.comm_name,c.comm_avatar
+        from comment c
+        where c.share_id = #{shareId}
+        order by c.create_time asc
+    </select>
+
+    <select resultMap="commentMap" id="getMyComment"  resultType="com.cheer.hole.entity.Comment">
+        select c.id,c.share_id,c.comuser_id,c.comment,c.create_time,c.comm_name,c.comm_avatar
+        from comment c
+        where c.comuser_id = #{comuserId}
+    </select>
+
+    <delete parameterType="STRING" id="deleteComment">
+        delete from comment where id = #{id};
+    </delete>
+</mapper>
